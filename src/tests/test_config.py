@@ -8,6 +8,7 @@ separate ``pydantic-settings`` package in Pydantic v2.  These tests pin the obse
 behavior -- environment-variable loading, case-insensitivity, defaults, and the
 ``x12_character_set`` pattern constraint -- so the migration preserves it.
 """
+
 import pytest
 from pydantic import ValidationError
 

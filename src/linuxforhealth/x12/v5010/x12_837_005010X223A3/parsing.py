@@ -469,33 +469,19 @@ def set_other_subscriber_entities_loop(
         elif identifier == "PR":
             loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_NAME
         elif identifier == "71":
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_ATTENDING_PROVIDER_NAME
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_ATTENDING_PROVIDER_NAME
         elif identifier == "72":
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_OPERATING_PHYSICIAN_NAME
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_OPERATING_PHYSICIAN_NAME
         elif identifier == "ZZ":
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_OTHER_OPERATING_PHYSICIAN
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_OTHER_OPERATING_PHYSICIAN
         elif identifier == "77":
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION
         elif identifier == "82":
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_RENDERING_PROVIDER_NAME
         elif identifier == "DN":
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
         elif identifier == "85":
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_BILLING_PROVIDER_NAME
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_BILLING_PROVIDER_NAME
 
         if not loop_name:
             raise ValueError(

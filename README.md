@@ -1,7 +1,7 @@
 # LinuxForHealth x12
 
 ![GitHub License](https://img.shields.io/github/license/LinuxForHealth/x12)
-![Supported Versions](https://img.shields.io/badge/python%20version-3.8%2C%203.9-blue)
+![Supported Versions](https://img.shields.io/badge/python%20version-3.10%2C%203.11%2C%203.12-blue)
 <br>
 ![Template CI](https://github.com/LinuxForHealth/x12/actions/workflows/continuous-integration.yml/badge.svg)
 <br>
@@ -26,7 +26,7 @@ Supported formats include:
 The LinuxForHealth X12 development environment relies on the following software packages:
 
 - [git](https://git-scm.com) for project version control
-- [Python 3.8 or higher](https://www.python.org/downloads/) for runtime/coding support
+- [Python 3.10 or higher](https://www.python.org/downloads/) for runtime/coding support
 
 ### Project Setup and Validation
 ```shell
@@ -151,26 +151,27 @@ user@mbp x12 % source venv/bin/activate
 (venv) user@mbp x12 % lfhx12-api
 ```
 
-### Code Formatting
+### Code Formatting and Linting
 
-LinuxForHealth X12 adheres to the [Black Code Style and Convention](https://black.readthedocs.io/en/stable/index.html)
+LinuxForHealth X12 uses [Ruff](https://docs.astral.sh/ruff/) for linting and formatting (a Black-compatible style).
 
-The following command executes the black formatter with default options
+The following commands lint and format the source:
 
 ```shell
 user@mbp x12 % source venv/bin/activate
-(venv) user@mbp x12 % black ./src
+(venv) user@mbp x12 % ruff check ./src      # lint
+(venv) user@mbp x12 % ruff format ./src     # format
 ```
 
-Use the `--help` flag to view all available options for the black code formatter
+A [pre-commit](https://pre-commit.com/) configuration is provided to run these automatically:
 
 ```shell
-(venv) user@mbp x12 % black --help
+(venv) user@mbp x12 % pre-commit install
 ```
 
 ## Building The Project
-LinuxForHealth X12 is aligned, to a degree, with the PEP-517 standard. `setup.cfg` stores build metadata/configuration.
-`pyproject.toml` contains the build toolchain specification and black formatter configurations.
+LinuxForHealth X12 is aligned, to a degree, with the PEP-517 standard. `pyproject.toml` stores the build
+metadata/configuration along with the toolchain specification and the Ruff formatter/linter configuration.
 
 The commands below creates a source and wheel distribution within a clean build environment.
 

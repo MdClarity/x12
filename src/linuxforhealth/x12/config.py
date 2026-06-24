@@ -3,6 +3,7 @@ config.py
 
 LinuxForHealth X12 Configuration Settings and specification/format "constants"
 """
+
 from enum import IntEnum
 from functools import lru_cache
 from pydantic import Field

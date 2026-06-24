@@ -3,6 +3,7 @@ parsing.py
 
 Provides X12 segment parsing support.
 """
+
 import inspect
 import logging
 import re
@@ -229,9 +230,9 @@ class X12Parser(ABC):
                 if is_component_field:
                     multivalue_fields[field_name] = self._delimiters.component_separator
                 else:
-                    multivalue_fields[
-                        field_name
-                    ] = self._delimiters.repetition_separator
+                    multivalue_fields[field_name] = (
+                        self._delimiters.repetition_separator
+                    )
 
         return multivalue_fields
 
@@ -255,7 +256,7 @@ class X12Parser(ABC):
         for index, value in enumerate(segment_fields):
             try:
                 field_name: str = field_names[index]
-            except IndexError as ie:
+            except IndexError:
                 msg = f"Error parsing {segment_name} segment field {index}"
                 raise X12ParseException(msg)
 

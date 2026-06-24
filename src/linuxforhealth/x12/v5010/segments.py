@@ -11,13 +11,12 @@ from enum import Enum
 from typing import Dict, List, Literal, Optional, Tuple, Union
 from decimal import Decimal
 
-from pydantic import model_validator, Field, PositiveInt
+from pydantic import model_validator, field_validator, Field, PositiveInt
 
 from linuxforhealth.x12.models import X12Segment, X12SegmentName, X12Delimiters
 from linuxforhealth.x12.support import (
     parse_x12_date,
     parse_interchange_date,
-    field_validator,
 )
 from linuxforhealth.x12.validators import validate_date_field
 from typing_extensions import Annotated
@@ -819,9 +818,10 @@ class DmgSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        date_fields: Tuple = values.get(
-            "date_time_period_format_qualifier"
-        ), values.get("date_time_period")
+        date_fields: Tuple = (
+            values.get("date_time_period_format_qualifier"),
+            values.get("date_time_period"),
+        )
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
@@ -1311,8 +1311,9 @@ class EbSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        quantity_fields: Tuple = values.get("quantity_qualifier"), values.get(
-            "quantity"
+        quantity_fields: Tuple = (
+            values.get("quantity_qualifier"),
+            values.get("quantity"),
         )
 
         if any(quantity_fields) and not all(quantity_fields):
@@ -1385,8 +1386,9 @@ class EqSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        reference_fields: Tuple = values.get("service_type_code"), values.get(
-            "medical_procedure_id"
+        reference_fields: Tuple = (
+            values.get("service_type_code"),
+            values.get("medical_procedure_id"),
         )
 
         if not any(reference_fields):
@@ -1855,8 +1857,9 @@ class HsdSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        quantity_fields: Tuple = values.get("quantity_qualifier"), values.get(
-            "quantity"
+        quantity_fields: Tuple = (
+            values.get("quantity_qualifier"),
+            values.get("quantity"),
         )
 
         if not any(quantity_fields):
@@ -1985,8 +1988,9 @@ class IiiSegment(X12Segment):
         :param values: The validated model values.
         """
         values = dict(self.__dict__)
-        industry_codes = values.get("code_list_qualifier_code"), values.get(
-            "industry_code"
+        industry_codes = (
+            values.get("code_list_qualifier_code"),
+            values.get("industry_code"),
         )
         if any(industry_codes) and not all(industry_codes):
             raise ValueError("Industry codes require a qualifier and value")
@@ -2055,9 +2059,10 @@ class InsSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        date_fields: Tuple = values.get(
-            "date_time_period_format_qualifier"
-        ), values.get("member_death_date")
+        date_fields: Tuple = (
+            values.get("date_time_period_format_qualifier"),
+            values.get("member_death_date"),
+        )
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
@@ -2481,8 +2486,9 @@ class MpiSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        date_fields: Tuple = values.get("date_time_format_qualifier"), values.get(
-            "date_time_period"
+        date_fields: Tuple = (
+            values.get("date_time_format_qualifier"),
+            values.get("date_time_period"),
         )
 
         if any(date_fields) and not all(date_fields):
@@ -2554,8 +2560,9 @@ class N4Segment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        state_fields: Tuple = values.get("state_province_code"), values.get(
-            "country_subdivision_code"
+        state_fields: Tuple = (
+            values.get("state_province_code"),
+            values.get("country_subdivision_code"),
         )
 
         if all(state_fields):
@@ -2602,8 +2609,9 @@ class Nm1Segment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        id_fields: Tuple = values.get("identification_code_qualifier"), values.get(
-            "identification_code"
+        id_fields: Tuple = (
+            values.get("identification_code_qualifier"),
+            values.get("identification_code"),
         )
 
         if any(id_fields) and not all(id_fields):
@@ -2715,9 +2723,10 @@ class PatSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        date_fields: Tuple = values.get(
-            "date_time_period_format_qualifier"
-        ), values.get("patient_death_date")
+        date_fields: Tuple = (
+            values.get("date_time_period_format_qualifier"),
+            values.get("patient_death_date"),
+        )
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
@@ -2735,8 +2744,9 @@ class PatSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        weight_fields: Tuple = values.get("unit_basis_measurement_code"), values.get(
-            "patient_weight"
+        weight_fields: Tuple = (
+            values.get("unit_basis_measurement_code"),
+            values.get("patient_weight"),
         )
 
         if any(weight_fields) and not all(weight_fields):
@@ -2777,16 +2787,18 @@ class PerSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        communication_fields: Tuple = values.get(
-            "communication_number_qualifier_2"
-        ), values.get("communication_number_2")
+        communication_fields: Tuple = (
+            values.get("communication_number_qualifier_2"),
+            values.get("communication_number_2"),
+        )
 
         if any(communication_fields) and not all(communication_fields):
             raise ValueError("communication fields require a qualifier and number")
 
-        communication_fields = values.get(
-            "communication_number_qualifier_3"
-        ), values.get("communication_number_3")
+        communication_fields = (
+            values.get("communication_number_qualifier_3"),
+            values.get("communication_number_3"),
+        )
 
         if any(communication_fields) and not all(communication_fields):
             raise ValueError("communication fields require a qualifier and number")
@@ -2871,9 +2883,10 @@ class PrvSegment(X12Segment):
         :param values: The raw, unvalidated transaction data.
         """
         values = dict(self.__dict__)
-        reference_fields: Tuple = values.get(
-            "reference_identification_qualifier"
-        ), values.get("reference_identification")
+        reference_fields: Tuple = (
+            values.get("reference_identification_qualifier"),
+            values.get("reference_identification"),
+        )
 
         if any(reference_fields) and not all(reference_fields):
             raise ValueError(
@@ -3252,9 +3265,9 @@ class Ts2Segment(X12Segment):
     total_disproportionate_share_amount: Optional[Decimal] = None
     total_capital_amount: Optional[Decimal] = None
     total_indirect_medical_education_amount: Optional[Decimal] = None
-    total_outlier_day_count: Optional[
-        Annotated[Decimal, Field(ge=Decimal("0.0"))]
-    ] = None
+    total_outlier_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = (
+        None
+    )
     total_day_outlier_amount: Optional[Decimal] = None
     total_cost_outlier_amount: Optional[Decimal] = None
     average_drg_length_of_stay: Optional[
@@ -3264,12 +3277,12 @@ class Ts2Segment(X12Segment):
     total_cost_report_day_count: Optional[
         Annotated[Decimal, Field(ge=Decimal("0.0"))]
     ] = None
-    total_covered_day_count: Optional[
-        Annotated[Decimal, Field(ge=Decimal("0.0"))]
-    ] = None
-    total_covered_day_count: Optional[
-        Annotated[Decimal, Field(ge=Decimal("0.0"))]
-    ] = None
+    total_covered_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = (
+        None
+    )
+    total_covered_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = (
+        None
+    )
     total_noncovered_day_count: Optional[
         Annotated[Decimal, Field(ge=Decimal("0.0"))]
     ] = None

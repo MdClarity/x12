@@ -43,6 +43,7 @@ The HealthCare Claims Professional set organizes loops into a hierarchical and n
 The Header and Footer components are not "loops" per the specification, but are included to standardize and simplify
 transactional modeling and processing.
 """
+
 from decimal import Decimal
 
 from linuxforhealth.x12.models import X12SegmentGroup
@@ -142,7 +143,7 @@ from linuxforhealth.x12.v4010.segments import (
     Cl1Segment,
     Cr6Segment,
 )
-from typing import List, Optional, Dict
+from typing import List, Optional
 from pydantic import Field, model_validator
 from linuxforhealth.x12.validators import (
     validate_duplicate_date_qualifiers,

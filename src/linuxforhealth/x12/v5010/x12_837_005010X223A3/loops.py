@@ -45,6 +45,7 @@ The HealthCare Claims Institutional set organizes loops into a hierarchical and 
 The Header and Footer components are not "loops" per the specification, but are included to standardize and simplify
 transactional modeling and processing.
 """
+
 from decimal import Decimal
 
 from linuxforhealth.x12.models import X12SegmentGroup
@@ -155,7 +156,7 @@ from linuxforhealth.x12.v5010.segments import (
     LqSegment,
     FrmSegment,
 )
-from typing import List, Optional, Dict
+from typing import List, Optional
 from pydantic import Field, model_validator
 from linuxforhealth.x12.validators import (
     validate_duplicate_date_qualifiers,

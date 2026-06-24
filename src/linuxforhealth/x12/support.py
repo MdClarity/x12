@@ -3,11 +3,12 @@ support.py
 
 Convenience functions for X12 Processing.
 """
+
 import datetime
 import os
 from typing import Union, Dict
 
-from pydantic import field_validator, BaseModel
+from pydantic import BaseModel
 
 from .config import IsaDelimiters
 

@@ -3,6 +3,7 @@ test_api.py
 
 Tests the optional Fast API x12/endpoint
 """
+
 import pytest
 from linuxforhealth.x12.api import app
 from typing import Dict

@@ -3,6 +3,7 @@ io.py
 
 Supports X12 I/O operations related to reading and writing X12 transaction sets.
 """
+
 import logging
 from io import StringIO, TextIOBase
 from typing import Dict, Iterator, List, Optional, Tuple

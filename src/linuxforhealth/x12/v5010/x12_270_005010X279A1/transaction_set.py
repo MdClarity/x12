@@ -40,7 +40,7 @@ class EligibilityInquiry(X12SegmentGroup):
 
                     if child_code == "0" and not first_name:
                         raise ValueError(
-                            f"name_first is required when the subscriber is the patient"
+                            "name_first is required when the subscriber is the patient"
                         )
 
         return self

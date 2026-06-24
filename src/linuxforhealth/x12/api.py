@@ -77,7 +77,7 @@ async def post_x12(
                     }
                     api_results.append(segment_data)
 
-    except (X12ParseException, ValidationError) as error:
+    except (X12ParseException, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid X12 payload. To troubleshoot please run the LFH X12 CLI",

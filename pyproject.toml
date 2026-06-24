@@ -34,7 +34,8 @@ api = [
     "httpx>=0.23",
 ]
 dev = [
-    "black>=23.0,<24.0",
+    "ruff>=0.6",
+    "mypy>=1.8",
     "pre-commit>=2.14.1",
     "pytest>=7.1.0",
     "pytest-cov>=4.0.0",
@@ -56,7 +57,7 @@ namespaces = true
 
 [tool.pytest.ini_options]
 testpaths = ["src/tests"]
-addopts = "--cov=linuxforhealth.x12 --cov-report=term-missing"
+addopts = "--cov=linuxforhealth.x12 --cov-report=term-missing --cov-fail-under=95"
 
 [tool.coverage.run]
 source = ["linuxforhealth.x12"]
@@ -65,19 +66,22 @@ omit = ["*/tests/*"]
 [tool.coverage.report]
 show_missing = true
 
-[tool.black]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
+[tool.ruff]
 line-length = 88
-target-version = ['py310']
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-    | \.git
-    | \.pytest_cache
-  )/
-)
-'''
+target-version = "py310"
+
+[tool.ruff.lint]
+# Default rule set (E4/E7/E9, F). The transaction packages intentionally use
+# `from ... import *` to re-export segment/loop models, so the star-import
+# warnings (F403/F405) are silenced rather than rewritten.
+ignore = ["F403", "F405"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+# The codebase is not yet fully typed; mypy is provided as an advisory tool.
+# These relaxations keep it runnable without a large up-front typing effort.
+check_untyped_defs = false
+disallow_untyped_defs = false
+warn_unused_ignores = false
+plugins = ["pydantic.mypy"]

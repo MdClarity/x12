@@ -22,7 +22,7 @@ from linuxforhealth.x12.v5010.segments import (
     HcpSegment,
     PwkSegment,
 )
-from typing import Literal, Optional, Dict, Union
+from typing import Literal, Optional, Union
 from enum import Enum
 from pydantic import Field, model_validator
 import datetime

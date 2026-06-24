@@ -24,7 +24,7 @@ from linuxforhealth.x12.v4010.segments import (
     HsdSegment,
     QtySegment,
 )
-from typing import Literal, Optional, Dict
+from typing import Literal, Optional
 from enum import Enum
 from pydantic import Field, model_validator
 

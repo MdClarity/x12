@@ -22,7 +22,7 @@ from linuxforhealth.x12.v5010.segments import (
     QtySegment,
     PwkSegment,
 )
-from typing import Literal, Optional, Dict
+from typing import Literal, Optional
 from enum import Enum
 from pydantic import Field, model_validator
 

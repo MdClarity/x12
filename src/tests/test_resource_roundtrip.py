@@ -12,6 +12,7 @@ detection in ``parsing.py``, enum/Decimal/date serialization, and ``Optional`` f
 defaults.  It is the safety net that makes the Pydantic v1 -> v2 migration verifiable:
 if behavior is preserved, every file here still round-trips.
 """
+
 import glob
 import os
 

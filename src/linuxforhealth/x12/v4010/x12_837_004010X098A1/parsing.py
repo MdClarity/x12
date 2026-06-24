@@ -512,9 +512,7 @@ def set_other_subscriber_entities_loop(
             )
         elif identifier in ("DN", "P3"):
             # loop 2330d
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_REFERRING_PROVIDER_NAME
         elif identifier == "82":
             # loop 2330e
             loop_name = (
@@ -522,14 +520,10 @@ def set_other_subscriber_entities_loop(
             )
         elif identifier == "QB":
             # loop 2330f
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_PURCHASED_SERVICE_PROVIDER
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_PURCHASED_SERVICE_PROVIDER
         elif identifier in ("77", "FA", "LI", "TL"):
             # loop 2330g
-            loop_name = (
-                TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION
-            )
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION
 
         if not loop_name:
             raise ValueError(

@@ -16,6 +16,7 @@ internals that are most fragile across the Pydantic v1 -> v2 migration:
 These give the migration direct unit coverage of the introspection logic rather than
 relying solely on the end-to-end round-trip suite.
 """
+
 from decimal import Decimal
 
 from linuxforhealth.x12.models import X12Delimiters

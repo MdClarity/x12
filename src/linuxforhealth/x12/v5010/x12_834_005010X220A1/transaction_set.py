@@ -9,8 +9,7 @@ from typing import List, Optional
 from linuxforhealth.x12.models import X12SegmentGroup
 
 from .loops import Footer, Header, Loop1000A, Loop1000B, Loop1000C, Loop2000
-from pydantic import model_validator, Field
-from linuxforhealth.x12.validators import validate_segment_count
+from pydantic import Field
 
 
 class BenefitEnrollmentAndMaintenance(X12SegmentGroup):
