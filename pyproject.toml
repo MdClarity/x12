@@ -4,6 +4,17 @@ requires = [
     "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+addopts = "--cov=linuxforhealth.x12 --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["linuxforhealth.x12"]
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+
 [tool.black]
 multi_line_output = 3
 include_trailing_comma = true
