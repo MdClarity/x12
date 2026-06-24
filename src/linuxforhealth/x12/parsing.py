@@ -12,7 +12,7 @@ from functools import lru_cache, wraps
 from importlib import import_module
 from typing import Callable, Dict, List, Optional, Set
 
-from .models import X12SegmentGroup, X12Segment, X12Delimiters
+from .models import X12SegmentGroup, X12Segment, X12Delimiters, _is_list_field
 from .support import parse_x12_major_version, get_latest_implementation_version
 
 logger = logging.getLogger(__name__)
@@ -202,7 +202,7 @@ class X12Parser(ABC):
 
         segment_model: X12Segment = self._lookup_segment_model(segment_name)
         # exclude "meta" fields such as delimiters that are not in the segment data
-        field_names = [f for f in segment_model.__fields__ if f != "delimiters"]
+        field_names = [f for f in segment_model.model_fields if f != "delimiters"]
         return field_names
 
     def _get_multivalue_fields(self, segment_name) -> Dict[str, str]:
@@ -219,14 +219,13 @@ class X12Parser(ABC):
 
         segment_model: X12Segment = self._lookup_segment_model(segment_name)
 
-        for field_name, model_data in segment_model.__fields__.items():
+        for field_name, model_data in segment_model.model_fields.items():
             if field_name == "delimiters":
                 continue
 
-            if "typing.List" in str(model_data.outer_type_):
-                is_component_field: bool = model_data.field_info.extra.get(
-                    "is_component", False
-                )
+            if _is_list_field(model_data.annotation):
+                field_extra = model_data.json_schema_extra or {}
+                is_component_field: bool = bool(field_extra.get("is_component", False))
                 if is_component_field:
                     multivalue_fields[field_name] = self._delimiters.component_separator
                 else:
@@ -308,7 +307,7 @@ class X12Parser(ABC):
         # convert segment data to a dictionary "record"
         segment_data: Dict = self._parse_segment(segment_name, segment_fields)
         if output_delimiters:
-            segment_data["delimiters"] = self._delimiters.dict()
+            segment_data["delimiters"] = self._delimiters.model_dump()
 
         if segment_name.lower() == "hl":
             self._context.hl_segment = segment_data
@@ -399,8 +398,8 @@ def _load_transaction_model(
 
     # return transaction set model
     for _, class_value in inspect.getmembers(transaction_module, inspect.isclass):
-        if hasattr(class_value, "schema"):
-            props: Set = set(class_value.schema()["properties"])
+        if hasattr(class_value, "model_fields"):
+            props: Set = set(class_value.model_fields.keys())
             # transaction set models have header and footer attributes
             if props.issuperset({"header", "footer"}):
                 return class_value

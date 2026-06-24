@@ -36,7 +36,7 @@ def _validate_duplicate_codes(values: Dict, segment_name: str, code_field: str):
     for segment in values.get(segment_name, []):
         # account for differing internal representation: model vs dict
         if not isinstance(segment, dict):
-            segment = segment.dict()
+            segment = segment.model_dump()
 
         code = segment.get(code_field)
         codes[code] += 1
@@ -49,39 +49,41 @@ def _validate_duplicate_codes(values: Dict, segment_name: str, code_field: str):
     return values
 
 
-def validate_duplicate_ref_codes(cls, values: Dict):
+def validate_duplicate_ref_codes(self):
     """
     Validates that a loop does not contain duplicate REF codes.
 
-    :param values: The validated transaction data.
     :raises: ValueError if duplicate REF codes are found.
     """
-    return _validate_duplicate_codes(
-        values, "ref_segment", "reference_identification_qualifier"
+    _validate_duplicate_codes(
+        dict(self.__dict__), "ref_segment", "reference_identification_qualifier"
     )
+    return self
 
 
-def validate_duplicate_amt_codes(cls, values: Dict):
+def validate_duplicate_amt_codes(self):
     """
     Validates that a loop does not contain duplicate REF codes.
 
-    :param values: The validated transaction data.
     :raises: ValueError if duplicate REF codes are found.
     """
-    return _validate_duplicate_codes(values, "amt_segment", "amount_qualifier_code")
+    _validate_duplicate_codes(
+        dict(self.__dict__), "amt_segment", "amount_qualifier_code"
+    )
+    return self
 
 
-def validate_duplicate_date_qualifiers(cls, values: Dict):
+def validate_duplicate_date_qualifiers(self):
     """
     Validates that a loop does not contain duplicate DTP date qualifiers.
 
-    :param values: The validated transaction data.
     :raises: ValueError if duplicate DTP date qualifiers are found.
     """
-    return _validate_duplicate_codes(values, "dtp_segment", "date_time_qualifier")
+    _validate_duplicate_codes(dict(self.__dict__), "dtp_segment", "date_time_qualifier")
+    return self
 
 
-def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]:
+def validate_date_field(cls, v, info) -> Union[datetime.date, str, None]:
     """
     Validates a date field using the segment's date_time_period_format_qualifier (D8 or RD8).
     The date_time_period_format_qualifier is used to indicate if a date field is a specific date or a date range.
@@ -101,7 +103,7 @@ def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]
         except ValueError:
             raise ValueError(f"Invalid date value {date_string}")
 
-    qualifier = values.get("date_time_period_format_qualifier")
+    qualifier = info.data.get("date_time_period_format_qualifier")
 
     # the date field may be "optional" in which case the qualifier is not present
     # if the qualifier field is required, it will be validated at the field level
@@ -121,13 +123,12 @@ def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]
         return handle_x12_date(v)
 
 
-def validate_segment_count(cls, values) -> Dict:
+def validate_segment_count(self) -> "object":
     """
     Validates the segment count conveyed in the transaction set footer, or SE segment.
     This function is only able to count "valid" segments since it is invoked as a "post" validator.
-
-    :param values: The valid transaction set values.
     """
+    values = dict(self.__dict__)
     expected_count: int = values["footer"].se_segment.transaction_segment_count
 
     if not expected_count:
@@ -140,4 +141,4 @@ def validate_segment_count(cls, values) -> Dict:
             f"SE segment count {expected_count} != actual count {actual_count}"
         )
 
-    return values
+    return self

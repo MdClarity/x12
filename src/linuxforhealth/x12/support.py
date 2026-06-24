@@ -4,11 +4,10 @@ support.py
 Convenience functions for X12 Processing.
 """
 import datetime
-import functools
 import os
 from typing import Union, Dict
 
-from pydantic import validator, BaseModel
+from pydantic import field_validator, BaseModel
 
 from .config import IsaDelimiters
 
@@ -140,12 +139,12 @@ def count_segments(values: Dict) -> int:
         elif k.endswith("_segment") and isinstance(v, list):
             segment_count += len(v)
         elif isinstance(v, BaseModel):
-            segment_count += count_segments(v.dict())
+            segment_count += count_segments(v.model_dump())
         elif isinstance(v, list):
             for item in v:
                 segment_count += (
-                    count_segments(item.dict())
-                    if hasattr(item, "dict")
+                    count_segments(item.model_dump())
+                    if hasattr(item, "model_dump")
                     else count_segments(item)
                 )
         elif isinstance(v, dict):
@@ -175,8 +174,3 @@ def parse_x12_major_version(x12_implementation_version) -> str:
         return ""
 
     return x12_implementation_version[2:6]
-
-
-# partial function used to "register" common field validator functions
-# common validator functions have the signature (cls, v, values)
-field_validator = functools.partial(validator, allow_reuse=True)
