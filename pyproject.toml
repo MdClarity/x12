@@ -28,11 +28,6 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-api = [
-    "fastapi>=0.100",
-    "uvicorn[standard]>=0.17.0",
-    "httpx>=0.23",
-]
 dev = [
     "ruff>=0.6",
     # ty is a pre-1.0 preview; pin exactly so the blocking type-check gate is
@@ -45,7 +40,6 @@ dev = [
 
 [project.scripts]
 lfhx12 = "linuxforhealth.x12.cli:main"
-lfhx12-api = "linuxforhealth.x12.api:run_server"
 
 [tool.setuptools]
 zip-safe = false

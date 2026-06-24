@@ -15,5 +15,3 @@ root:
 loggers:
   x12:
     level: INFO
-  uvicorn:
-    level: INFO
