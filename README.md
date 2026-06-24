@@ -184,3 +184,4 @@ python3 -m build --no-isolation
 - [Design Overview](repo-docs/DESIGN.md)
 - [New Transaction Support](repo-docs/NEW_TRANSACTION.md)
 - [Container Support](repo-docs/CONTAINER_SUPPORT.md)
+- [X12 / EDI References](repo-docs/X12_REFERENCES.md)
