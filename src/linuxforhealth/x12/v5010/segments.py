@@ -313,7 +313,6 @@ class BprSegment(X12Segment):
             "receiver_account_qualifier",
             "receiver_account_number",
         ):
-
             if not values.get(f):
                 raise ValueError(f"{f} is required for electronic transactions")
 

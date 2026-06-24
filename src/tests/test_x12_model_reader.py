@@ -10,7 +10,6 @@ import pytest
 
 
 def test_multiple_transactions(large_x12_message):
-
     with X12ModelReader(large_x12_message) as r:
         model_result = [m for m in r.models()]
         assert len(model_result) == 10

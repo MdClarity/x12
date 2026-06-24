@@ -17,7 +17,6 @@ def resource_path() -> str:
     ["dependent-health-benefit-check.270", "subscriber-health-benefit-check.270"],
 )
 def test_270_model(resource_path, file_name: str):
-
     x12_file_path = os.path.join(resource_path, file_name)
     assert os.path.exists(x12_file_path)
     assert_eq_model(x12_file_path)

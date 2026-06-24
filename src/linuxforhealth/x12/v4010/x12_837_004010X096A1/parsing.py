@@ -232,7 +232,6 @@ def set_subscriber_name_loop(context: X12ParserContext, segment_data: Dict) -> N
     """
 
     if context.loop_name == TransactionLoops.SUBSCRIBER:
-
         if TransactionLoops.SUBSCRIBER_NAME not in context.subscriber_record:
             context.subscriber_record[TransactionLoops.SUBSCRIBER_NAME] = {
                 "ref_segment": []
@@ -277,7 +276,6 @@ def set_subscriber_payer_name_loop(
     :param segment_data: The current segment data
     """
     if "2010b" in context.loop_name:
-
         if TransactionLoops.SUBSCRIBER_PAYER_NAME not in context.subscriber_record:
             context.subscriber_record[TransactionLoops.SUBSCRIBER_PAYER_NAME] = {
                 "ref_segment": []

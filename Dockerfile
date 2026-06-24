@@ -1,7 +1,7 @@
 # Builds the LinuxForHealth X12 API container using a multi-stage build
 
 # build stage
-FROM python:3.10-slim-buster AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 # the full semantic version number, used to match to the generated wheel file in dist/
 ARG X12_SEM_VER
@@ -26,7 +26,7 @@ RUN python -m build
 RUN python -m pip install dist/linuxforhealth_x12-"$X12_SEM_VER"-py3-none-any.whl[api]
 
 # main image
-FROM python:3.10-slim-buster
+FROM python:3.12-slim-bookworm
 
 # container build arguments
 # lfh user id and group ids

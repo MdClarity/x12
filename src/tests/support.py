@@ -25,7 +25,6 @@ def assert_eq_model(x12_path: str):
         x12_data = "".join([l for l in f.readlines() if l])
 
         with X12ModelReader(x12_data) as r:
-
             segment_terminator = r._x12_segment_reader.delimiters.segment_terminator
             segments = [
                 s for s in x12_data.split(segment_terminator) if s and s != "\n"

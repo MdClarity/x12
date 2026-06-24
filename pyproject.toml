@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools>-42",
+    "setuptools>=61",
     "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -21,7 +21,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 line-length = 88
-target-version = ['py38']
+target-version = ['py310']
 include = '\.pyi?$'
 exclude = '''
 (
