@@ -374,6 +374,7 @@ class Loop2000DtpSegment(DtpSegment):
         EDUCATION_END = "351"
         ELIGIBILITY_BEGIN = "356"
         ELIGIBILITY_END = "357"
+        CYCLE_BEGIN = "358"
         ADJUSTED_HIRE = "383"
         CREDITED_SERVICE_BEGIN = "385"
         CREDITED_SERVICE_END = "386"

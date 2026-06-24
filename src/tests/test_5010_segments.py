@@ -523,9 +523,15 @@ def test_lui_segment():
 
 
 def test_lx_segment():
-    segment_data = {"assigned_number": 1}
+    segment_data = {"assigned_number": "1"}
     lx_segment: LxSegment = LxSegment(**segment_data)
     assert lx_segment.x12() == "LX*1~"
+
+
+def test_lx_segment_preserves_leading_zero():
+    # LX01 is modeled as a string so zero-padded values round-trip unchanged
+    lx_segment: LxSegment = LxSegment(assigned_number="01")
+    assert lx_segment.x12() == "LX*01~"
 
 
 def test_mea_segment():

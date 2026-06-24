@@ -20,15 +20,6 @@ import pytest
 
 from tests.support import assert_eq_model, resources_directory
 
-# Resource files with a known, pre-existing defect that prevents a clean round-trip.
-# These are tracked as xfail so the gap stays visible without breaking the suite.
-#
-#   enroll-employee-managed-care.834 -> TypeError: argument of type
-#   'X12ParserContext' is not iterable  (raised during 834 loop parsing)
-KNOWN_BROKEN = {
-    os.path.join("834_005010X220A1", "enroll-employee-managed-care.834"),
-}
-
 
 def _discover_resource_files():
     """Yields every sample transaction file under the resources directory."""
@@ -41,25 +32,12 @@ def _discover_resource_files():
 RESOURCE_FILES = list(_discover_resource_files())
 
 
-def _param(rel_path: str):
-    """Wraps a resource path in an xfail marker when it is a known-broken file."""
-    if rel_path in KNOWN_BROKEN:
-        return pytest.param(
-            rel_path,
-            marks=pytest.mark.xfail(
-                reason="834 parsing defect (X12ParserContext not iterable)",
-                strict=True,
-            ),
-        )
-    return pytest.param(rel_path)
-
-
 def test_resources_were_discovered():
     """Guards against the glob silently matching nothing (e.g. moved resources)."""
     assert len(RESOURCE_FILES) >= 60
 
 
-@pytest.mark.parametrize("rel_path", [_param(p) for p in RESOURCE_FILES])
+@pytest.mark.parametrize("rel_path", RESOURCE_FILES)
 def test_resource_round_trips(rel_path: str):
     """Each sample transaction must regenerate its original X12 input exactly."""
     x12_file_path = os.path.join(resources_directory, rel_path)

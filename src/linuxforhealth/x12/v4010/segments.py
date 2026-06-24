@@ -1967,7 +1967,9 @@ class LxSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.LX
-    assigned_number: Annotated[int, Field(gt=0)]
+    # LX01 is a numeric (N0) field, but is modeled as a length-constrained string
+    # so leading zeros (e.g. "01") are preserved on serialization.
+    assigned_number: str = Field(min_length=1, max_length=6, pattern=r"^\d+$")
 
 
 class MeaSegment(X12Segment):

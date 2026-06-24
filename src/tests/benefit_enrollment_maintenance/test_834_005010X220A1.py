@@ -26,9 +26,7 @@ def resource_path() -> str:
         "reinstate-employee.834",
         "reinstate-employee-coverage-level.834",
         "reinstate-member-eligiblity-ins.834",
-        # "enroll-employee-managed-care.834" is intentionally omitted: it triggers a
-        # pre-existing 834 parsing defect (X12ParserContext not iterable) and is tracked
-        # as xfail in test_resource_roundtrip.py.
+        "enroll-employee-managed-care.834",
     ],
 )
 def test_834_model(resource_path, file_name: str):
