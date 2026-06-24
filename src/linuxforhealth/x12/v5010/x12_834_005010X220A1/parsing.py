@@ -12,7 +12,7 @@ Loop parsing functions are implemented as set_[description]_loop(context: X12Par
 from enum import Enum
 
 from linuxforhealth.x12.parsing import match, X12ParserContext
-from typing import Dict
+from typing import Dict, Optional
 
 # ids for Loop2100G
 responsible_person_loop_ids = [
@@ -255,7 +255,7 @@ def set_member_mailing_address_loop(
     )
 
 
-def _is_responsible_person(entity_identifier: str):
+def _is_responsible_person(entity_identifier: Optional[str]) -> bool:
     """Returns true if the entity identifier is used for loop 2100G"""
     return entity_identifier in responsible_person_loop_ids
 

@@ -646,7 +646,7 @@ class Loop2300(X12SegmentGroup):
         Validates that CLM02 == SUM(Loop2400.SV102)
         """
         values = dict(self.__dict__)
-        claim_amount: Decimal = values.get("clm_segment").total_claim_charge_amount
+        claim_amount: Decimal = values["clm_segment"].total_claim_charge_amount
         line_total: Decimal = Decimal("0.0")
 
         for line in values.get("loop_2400", []):

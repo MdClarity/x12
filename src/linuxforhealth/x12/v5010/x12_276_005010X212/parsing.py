@@ -37,7 +37,7 @@ class TransactionLoops(str, Enum):
     FOOTER = "footer"
 
 
-def _get_information_source(context: X12ParserContext) -> Optional[Dict]:
+def _get_information_source(context: X12ParserContext) -> Dict:
     return context.transaction_data[TransactionLoops.INFORMATION_SOURCE_LEVEL][-1]
 
 
@@ -48,7 +48,7 @@ def _get_information_receiver(context: X12ParserContext) -> Dict:
 
 
 def _get_service_provider(
-    context: X12ParserContext, hierarchical_id: str
+    context: X12ParserContext, hierarchical_id: Optional[str]
 ) -> Optional[Dict]:
     """
     Returns the service provider record by id.

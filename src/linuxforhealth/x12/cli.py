@@ -12,7 +12,7 @@ import argparse
 import json
 from .encoding import X12JsonEncoder
 from .io import X12SegmentReader, X12ModelReader
-from typing import List
+from typing import Any, Dict, List
 
 
 CLI_DESCRIPTION = """
@@ -21,7 +21,7 @@ Messages are returned in JSON format in either a segment or transactional format
 """
 
 
-def _create_arg_parser():
+def _create_arg_parser() -> argparse.ArgumentParser:
     """
     Creates the Argument Parser for the CLI utility.
     :return: ArgumentParser
@@ -62,7 +62,7 @@ def _create_arg_parser():
     return parser
 
 
-def _parse_segments(file_path: str) -> List:
+def _parse_segments(file_path: str) -> List[Dict[str, Any]]:
     """
     Parses X12 segments from an input file.
 
@@ -71,7 +71,7 @@ def _parse_segments(file_path: str) -> List:
     """
 
     with X12SegmentReader(file_path) as r:
-        segments = []
+        segments: List[Dict[str, Any]] = []
 
         for segment_name, segment in r.segments():
             segment_data = {
@@ -83,7 +83,7 @@ def _parse_segments(file_path: str) -> List:
 
 def _parse_models(
     file_path: str, exclude_none: bool = False, output_delimiters: bool = False
-) -> List:
+) -> List[Dict[str, Any]]:
     """
     Parses a X12 segment model from a X12 input file.
 
@@ -96,12 +96,12 @@ def _parse_models(
     with X12ModelReader(file_path, output_delimiters=output_delimiters) as r:
         # if field is not set it will be omitted
         # fields explicitly set to None will be included if exclude_none is True
-        export_params = {
+        export_params: Dict[str, Any] = {
             "exclude_unset": True,
             "exclude_none": exclude_none,
         }
 
-        models = []
+        models: List[Dict[str, Any]] = []
 
         for m in r.models():
             model_data = m.model_dump(**export_params)
@@ -109,7 +109,7 @@ def _parse_models(
         return models
 
 
-def main():
+def main() -> None:
     """
     CLI module entrypoint
     """
@@ -124,7 +124,7 @@ def main():
     else:
         x12_data = _parse_models(args.file, args.exclude, args.delimiters)
 
-    json_opts = {"cls": X12JsonEncoder}
+    json_opts: Dict[str, Any] = {"cls": X12JsonEncoder}
 
     if args.pretty:
         json_opts["indent"] = 4

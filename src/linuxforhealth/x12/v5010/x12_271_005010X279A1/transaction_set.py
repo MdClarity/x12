@@ -4,7 +4,7 @@ transaction_set.py
 Defines the Eligibility 271 005010X279A1 transaction set model.
 """
 
-from typing import List, Dict, Tuple
+from typing import Any, List, Tuple
 
 from linuxforhealth.x12.models import X12SegmentGroup
 
@@ -76,7 +76,7 @@ class EligibilityBenefit(X12SegmentGroup):
         """
         values = dict(self.__dict__)
 
-        def get_ids(hl_segment: Dict) -> Tuple[int, int]:
+        def get_ids(hl_segment: Any) -> Tuple[int, int]:
             """returns tuple of (id, parent_id)"""
             id = hl_segment.hierarchical_id_number
             parent_id = hl_segment.hierarchical_parent_id_number

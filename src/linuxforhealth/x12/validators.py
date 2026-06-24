@@ -12,13 +12,18 @@ Field validators support a varying signature:
     - (cls, kwargs) - provides a key word arguments shorthand for the above parameters
 """
 
-from typing import Dict, Union
+import datetime
+from typing import Any, Dict, Union, TYPE_CHECKING
 from collections import defaultdict
-from datetime import datetime
 from .support import parse_x12_date, count_segments
 
+if TYPE_CHECKING:
+    from linuxforhealth.x12.models import X12SegmentGroup
 
-def _validate_duplicate_codes(values: Dict, segment_name: str, code_field: str):
+
+def _validate_duplicate_codes(
+    values: Dict[str, Any], segment_name: str, code_field: str
+) -> Dict[str, Any]:
     """
     Validates duplicate code values for repeating segments.
 
@@ -50,7 +55,7 @@ def _validate_duplicate_codes(values: Dict, segment_name: str, code_field: str):
     return values
 
 
-def validate_duplicate_ref_codes(self):
+def validate_duplicate_ref_codes(self: "X12SegmentGroup") -> "X12SegmentGroup":
     """
     Validates that a loop does not contain duplicate REF codes.
 
@@ -62,7 +67,7 @@ def validate_duplicate_ref_codes(self):
     return self
 
 
-def validate_duplicate_amt_codes(self):
+def validate_duplicate_amt_codes(self: "X12SegmentGroup") -> "X12SegmentGroup":
     """
     Validates that a loop does not contain duplicate REF codes.
 
@@ -74,7 +79,7 @@ def validate_duplicate_amt_codes(self):
     return self
 
 
-def validate_duplicate_date_qualifiers(self):
+def validate_duplicate_date_qualifiers(self: "X12SegmentGroup") -> "X12SegmentGroup":
     """
     Validates that a loop does not contain duplicate DTP date qualifiers.
 
@@ -124,7 +129,7 @@ def validate_date_field(cls, v, info) -> Union[datetime.date, str, None]:
         return handle_x12_date(v)
 
 
-def validate_segment_count(self) -> "object":
+def validate_segment_count(self: "X12SegmentGroup") -> "X12SegmentGroup":
     """
     Validates the segment count conveyed in the transaction set footer, or SE segment.
     This function is only able to count "valid" segments since it is invoked as a "post" validator.

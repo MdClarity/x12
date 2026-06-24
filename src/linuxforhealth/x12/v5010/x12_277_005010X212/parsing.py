@@ -39,7 +39,7 @@ class TransactionLoops(str, Enum):
     FOOTER = "footer"
 
 
-def _get_information_source(context: X12ParserContext) -> Optional[Dict]:
+def _get_information_source(context: X12ParserContext) -> Dict:
     return context.transaction_data[TransactionLoops.INFORMATION_SOURCE_LEVEL][-1]
 
 
@@ -50,7 +50,7 @@ def _get_information_receiver(context: X12ParserContext) -> Dict:
 
 
 def _get_service_provider(
-    context: X12ParserContext, hierarchical_id: str
+    context: X12ParserContext, hierarchical_id: Optional[str]
 ) -> Optional[Dict]:
     """
     Returns the service provider record by id.
@@ -224,6 +224,9 @@ def set_service_provider_trace_identifier_loop(
 
         service_provider_id = context.hl_segment.get("hierarchical_id_number")
         service_provider = _get_service_provider(context, service_provider_id)
+        assert (
+            service_provider is not None
+        )  # active service provider loop guarantees a record
         service_provider[loop_name] = {"stc_segment": []}
 
         loop_record = service_provider[loop_name]

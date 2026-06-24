@@ -2102,7 +2102,7 @@ class IsaSegment(X12Segment):
         parse_interchange_date
     )
 
-    def x12(self, custom_delimiters: X12Delimiters = None) -> str:
+    def x12(self, custom_delimiters: Optional[X12Delimiters] = None) -> str:
         """
         Overriden to support formatting the interchange date as yymmdd ( %y%m%d )
         By default the method will use default X12 delimiters. Custom delimiters may be specified if desired using

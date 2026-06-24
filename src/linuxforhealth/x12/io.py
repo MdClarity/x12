@@ -36,7 +36,7 @@ class X12SegmentReader:
         :param x12_input: The X12 Message or a path to a X12 file
         """
 
-        self._x12_input: str = x12_input
+        self._x12_input: Optional[str] = x12_input
 
         # set in __enter__
         self._buffer_size: Optional[int] = None
@@ -49,6 +49,7 @@ class X12SegmentReader:
         The ISA segment is conveyed in the first 106 characters of the transmission.
         :return: The message delimiters as a dict
         """
+        assert self._x12_stream is not None  # set in __enter__
         self._x12_stream.seek(0)
 
         isa_segment: str = self._x12_stream.read(IsaDelimiters.SEGMENT_LENGTH)
@@ -67,6 +68,7 @@ class X12SegmentReader:
         :return: The X12SegmentReader instance
         :raise: ValueError if the x12 input is invalid
         """
+        assert self._x12_input is not None  # reset to None only in __exit__
         if is_x12_file(self._x12_input):
             self._x12_stream = open(self._x12_input, "r")
         elif is_x12_data(self._x12_input):
@@ -94,6 +96,7 @@ class X12SegmentReader:
         :param exc_val: Exception Value
         :param exc_tb: Exception traceback
         """
+        assert self._x12_stream is not None  # set in __enter__
         if not self._x12_stream.closed:
             self._x12_stream.close()
 
@@ -107,6 +110,8 @@ class X12SegmentReader:
 
         :return: Iterator containing segment name and segment fields.
         """
+        assert self._x12_stream is not None  # set in __enter__
+        assert self.delimiters is not None  # set in __enter__
         self._x12_stream.seek(0)
         while True:
             buffer: str = self._x12_stream.read(self._buffer_size)
@@ -220,11 +225,11 @@ class X12ModelReader:
                         TransactionSetVersionIds.FALLBACK_IMPLEMENTATION_VERSION
                     ]
 
-                parser: X12Parser = create_parser(
-                    transaction_code, version, self._x12_segment_reader.delimiters
-                )
+                delimiters = self._x12_segment_reader.delimiters
+                assert delimiters is not None  # set by reader __enter__
+                parser: X12Parser = create_parser(transaction_code, version, delimiters)
 
-            model: X12SegmentGroup = parser.parse(
+            model: Optional[X12SegmentGroup] = parser.parse(
                 segment_name, segment_fields, self.output_delimiters
             )
             if model:
