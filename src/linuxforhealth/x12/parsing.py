@@ -337,12 +337,13 @@ class X12Parser(ABC):
         for loop_parser in self._loop_parsers[segment_name]:
             try:
                 loop_parser(segment_data, self._context)
-            except LookupError as e:
+            except (LookupError, AttributeError) as e:
                 # Loop parsers assume segments arrive in specification order and
-                # navigate the partially-built loop container by key/index. Out-of-
-                # order or missing parent loops surface as KeyError/IndexError;
-                # convert that structural class to a clean parse error here, at the
-                # single dispatch chokepoint, rather than in each of the ~90 accessors.
+                # navigate the partially-built loop container by key/index/attribute.
+                # Out-of-order or missing parent loops surface as KeyError/IndexError
+                # (LookupError) or attribute access on a None record; convert that
+                # structural class to a clean parse error here, at the single dispatch
+                # chokepoint, rather than in each of the ~90 accessors.
                 raise X12ParseException(
                     f"Unable to parse segment {segment_name}: unexpected segment order"
                 ) from e
