@@ -10,7 +10,7 @@ Loop parsing functions are implemented as set_[description]_loop(context: X12Par
 """
 
 from enum import Enum
-from linuxforhealth.x12.parsing import X12ParserContext, match
+from linuxforhealth.x12.parsing import match, X12ParseException, X12ParserContext
 from typing import Dict, Optional
 
 
@@ -201,7 +201,7 @@ def set_subscriber_loop(context: X12ParserContext, segment_data: Dict) -> None:
     service_provider = _get_service_provider(context, service_provider_id)
 
     if service_provider is None:
-        raise LookupError(f"Service Provider ID {service_provider_id} not found")
+        raise X12ParseException(f"Service Provider ID {service_provider_id} not found")
 
     if TransactionLoops.SUBSCRIBER_LEVEL not in service_provider:
         service_provider[TransactionLoops.SUBSCRIBER_LEVEL] = []

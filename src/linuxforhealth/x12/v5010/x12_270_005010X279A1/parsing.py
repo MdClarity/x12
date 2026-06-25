@@ -11,7 +11,7 @@ Loop parsing functions are implemented as set_[description]_loop(context: X12Par
 
 from enum import Enum
 
-from linuxforhealth.x12.parsing import match, X12ParserContext
+from linuxforhealth.x12.parsing import match, X12ParseException, X12ParserContext
 from typing import Optional, Dict
 
 
@@ -144,7 +144,11 @@ def set_entity_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     elif context.loop_name == TransactionLoops.DEPENDENT:
         new_loop_name = TransactionLoops.DEPENDENT_NAME
 
-    assert new_loop_name is not None  # one of the entity loop contexts is always active
+    # for valid input one of the entity loop contexts is always active
+    if new_loop_name is None:
+        raise X12ParseException(
+            f"Unexpected NM1 entity name segment in loop {context.loop_name}"
+        )
     context.loop_container[new_loop_name] = {"ref_segment": []}
     context.set_loop_context(new_loop_name, context.loop_container[new_loop_name])
 

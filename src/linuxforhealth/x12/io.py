@@ -10,10 +10,31 @@ from typing import Dict, Iterator, List, Optional, Tuple
 
 from .config import IsaDelimiters, TransactionSetVersionIds, get_config
 from .models import X12Delimiters, X12SegmentGroup, X12SegmentName
-from .parsing import X12Parser, create_parser
+from .parsing import X12Parser, X12ParseException, create_parser
 from .support import is_x12_data, is_x12_file
 
 logger = logging.getLogger(__name__)
+
+
+def _require_field(
+    fields: List[str], index: int, segment_name: str, description: str
+) -> str:
+    """
+    Returns ``fields[index]`` or raises :class:`X12ParseException` when the
+    segment is truncated.  Control segments (ISA/GS/ST) are positional, so a
+    missing field on malformed input must surface as a clean parse error rather
+    than an ``IndexError``.
+
+    :param fields: The segment's field values.
+    :param index: The required field index.
+    :param segment_name: The segment name, used for the error message.
+    :param description: A human description of the field, used for the error message.
+    """
+    if index >= len(fields):
+        raise X12ParseException(
+            f"Invalid {segment_name} segment: missing {description}"
+        )
+    return fields[index]
 
 
 class X12SegmentReader:
@@ -53,6 +74,13 @@ class X12SegmentReader:
         self._x12_stream.seek(0)
 
         isa_segment: str = self._x12_stream.read(IsaDelimiters.SEGMENT_LENGTH)
+
+        if len(isa_segment) < IsaDelimiters.SEGMENT_LENGTH:
+            raise X12ParseException(
+                "Invalid ISA segment: expected "
+                f"{int(IsaDelimiters.SEGMENT_LENGTH)} characters, "
+                f"received {len(isa_segment)}"
+            )
 
         return {
             "element_separator": isa_segment[IsaDelimiters.ELEMENT_SEPARATOR],
@@ -205,29 +233,52 @@ class X12ModelReader:
         """
         version: Optional[str] = None
         transaction_code: Optional[str] = None
+        parser: Optional[X12Parser] = None
 
         for segment_name, segment_fields in self._x12_segment_reader.segments():
             if self._is_group_header(segment_name):
-                version: str = segment_fields[
-                    TransactionSetVersionIds.IMPLEMENTATION_VERSION
-                ]
+                version = _require_field(
+                    segment_fields,
+                    TransactionSetVersionIds.IMPLEMENTATION_VERSION,
+                    segment_name,
+                    "implementation version",
+                )
 
             if self._is_control_segment(segment_name):
                 continue
 
             if self._is_transaction_header(segment_name):
-                transaction_code: str = segment_fields[
-                    TransactionSetVersionIds.TRANSACTION_SET_CODE
-                ]
+                transaction_code = _require_field(
+                    segment_fields,
+                    TransactionSetVersionIds.TRANSACTION_SET_CODE,
+                    segment_name,
+                    "transaction set code",
+                )
 
                 if version is None:
-                    version: str = segment_fields[
-                        TransactionSetVersionIds.FALLBACK_IMPLEMENTATION_VERSION
-                    ]
+                    version = _require_field(
+                        segment_fields,
+                        TransactionSetVersionIds.FALLBACK_IMPLEMENTATION_VERSION,
+                        segment_name,
+                        "implementation version",
+                    )
 
                 delimiters = self._x12_segment_reader.delimiters
                 assert delimiters is not None  # set by reader __enter__
-                parser: X12Parser = create_parser(transaction_code, version, delimiters)
+                try:
+                    parser = create_parser(transaction_code, version, delimiters)
+                except (ModuleNotFoundError, ValueError, KeyError) as e:
+                    # ModuleNotFoundError: no transaction module; ValueError: no
+                    # parser class; KeyError: unsupported implementation version.
+                    raise X12ParseException(
+                        f"Unsupported transaction {transaction_code}/{version}"
+                    ) from e
+
+            if parser is None:
+                raise X12ParseException(
+                    f"Encountered segment {segment_name} before a "
+                    "transaction header (ST)"
+                )
 
             model: Optional[X12SegmentGroup] = parser.parse(
                 segment_name, segment_fields, self.output_delimiters
