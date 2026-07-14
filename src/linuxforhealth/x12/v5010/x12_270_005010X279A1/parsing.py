@@ -144,6 +144,7 @@ def set_entity_name_loop(context: X12ParserContext, segment_data: Dict) -> None:
     elif context.loop_name == TransactionLoops.DEPENDENT:
         new_loop_name = TransactionLoops.DEPENDENT_NAME
 
+    assert new_loop_name is not None  # one of the entity loop contexts is always active
     context.loop_container[new_loop_name] = {"ref_segment": []}
     context.set_loop_context(new_loop_name, context.loop_container[new_loop_name])
 

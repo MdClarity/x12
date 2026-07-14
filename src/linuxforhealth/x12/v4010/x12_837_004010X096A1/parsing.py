@@ -500,7 +500,7 @@ def set_other_subscriber_entities_loop(
             )
         elif identifier == "FA":
             # loop 2330h
-            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_LOCATION
+            loop_name = TransactionLoops.CLAIM_OTHER_SUBSCRIBER_OTHER_PAYER_SERVICE_FACILITY_PROVIDER
 
         if not loop_name:
             raise ValueError(

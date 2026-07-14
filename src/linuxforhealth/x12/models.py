@@ -7,13 +7,13 @@ Base models for X12 parsing and validation.
 import abc
 import datetime
 from enum import Enum
-from typing import List, Optional, Union, get_args, get_origin
+from typing import Any, List, Optional, Union, get_args, get_origin
 from decimal import Decimal
 
 from pydantic import ConfigDict, BaseModel, Field
 
 
-def _unwrap_field_type(annotation):
+def _unwrap_field_type(annotation: Any) -> Any:
     """
     Resolves the underlying model type for a field annotation, unwrapping
     ``Optional[...]`` / ``Union[..., None]`` and ``List[...]`` wrappers.
@@ -38,7 +38,7 @@ def _unwrap_field_type(annotation):
     return annotation
 
 
-def _is_list_field(annotation) -> bool:
+def _is_list_field(annotation: Any) -> bool:
     """
     Returns True when a field annotation denotes a list (multi-value) field,
     unwrapping a leading ``Optional[...]`` / ``Union[..., None]`` wrapper.
@@ -172,7 +172,7 @@ class X12Segment(abc.ABC, BaseModel):
         self,
         field_name: str,
         field_value: List,
-        custom_delimiters: X12Delimiters = None,
+        custom_delimiters: Optional[X12Delimiters] = None,
     ) -> str:
         """
         Converts a X12 multi-value (list) field into a a single delimited string.
@@ -197,7 +197,7 @@ class X12Segment(abc.ABC, BaseModel):
             join_character = delimiters.repetition_separator
         return join_character.join(field_value)
 
-    def x12(self, custom_delimiters: X12Delimiters = None) -> str:
+    def x12(self, custom_delimiters: Optional[X12Delimiters] = None) -> str:
         """
         Generates a X12 formatted string for the segment.
         By default, the method will use default X12 delimiters. Custom delimiters may be specified if desired using
@@ -241,7 +241,9 @@ class X12SegmentGroup(abc.ABC, BaseModel):
     """
 
     def x12(
-        self, use_new_lines: bool = True, custom_delimiters: X12Delimiters = None
+        self,
+        use_new_lines: bool = True,
+        custom_delimiters: Optional[X12Delimiters] = None,
     ) -> str:
         """
         Generates a X12 formatted string for the segment.

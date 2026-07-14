@@ -3,7 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 import uvicorn
-from typing import Dict, Optional, List
+from typing import Dict, List
 from linuxforhealth.x12.config import get_x12_api_config, X12ApiConfig
 from linuxforhealth.x12.io import X12SegmentReader, X12ModelReader
 from linuxforhealth.x12.parsing import X12ParseException
@@ -13,7 +13,9 @@ app = FastAPI()
 
 
 @app.exception_handler(RequestValidationError)
-async def request_validation_handler(request: Request, exc: RequestValidationError):
+async def request_validation_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder(
@@ -40,7 +42,7 @@ class X12Request(BaseModel):
 @app.post("/x12")
 async def post_x12(
     x12_request: X12Request,
-    lfh_x12_response: Optional[str] = Header(default="models"),
+    lfh_x12_response: str = Header(default="models"),
 ) -> List[Dict]:
     """
     Processes an incoming X12 payload.
@@ -86,18 +88,16 @@ async def post_x12(
         return api_results
 
 
-def run_server():
+def run_server() -> None:
     """Launches the API server"""
     config: X12ApiConfig = get_x12_api_config()
 
-    uvicorn_params = {
-        "app": config.x12_uvicorn_app,
-        "host": config.x12_uvicorn_host,
-        "port": config.x12_uvicorn_port,
-        "reload": config.x12_uvicorn_reload,
-    }
-
-    uvicorn.run(**uvicorn_params)
+    uvicorn.run(
+        config.x12_uvicorn_app,
+        host=config.x12_uvicorn_host,
+        port=config.x12_uvicorn_port,
+        reload=config.x12_uvicorn_reload,
+    )
 
 
 if __name__ == "__main__":

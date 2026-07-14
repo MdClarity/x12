@@ -13,7 +13,7 @@ from decimal import Decimal
 
 from pydantic import model_validator, field_validator, Field, PositiveInt
 
-from linuxforhealth.x12.models import X12Segment, X12SegmentName
+from linuxforhealth.x12.models import X12Delimiters, X12Segment, X12SegmentName
 from linuxforhealth.x12.support import (
     parse_x12_date,
     parse_interchange_date,
@@ -1859,11 +1859,12 @@ class IsaSegment(X12Segment):
         parse_interchange_date
     )
 
-    def x12(self) -> str:
+    def x12(self, custom_delimiters: Optional[X12Delimiters] = None) -> str:
         """
         Overriden to support formatting the interchange date as yymmdd ( %y%m%d )
         """
         x12_string: str = super().x12()
+        assert self.delimiters is not None  # delimiters are populated during parsing
         segment_fields = x12_string.split(self.delimiters.element_separator)
 
         interchange_date = datetime.datetime.strptime(

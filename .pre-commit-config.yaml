@@ -10,3 +10,13 @@ repos:
         args: [--fix]
       # format
       - id: ruff-format
+  # ty type check, using the pinned `ty` from the dev environment so the version
+  # matches the CI gate (avoids drift from this preview tool).
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty
+        entry: ty check src/linuxforhealth
+        language: system
+        pass_filenames: false
+        types: [python]

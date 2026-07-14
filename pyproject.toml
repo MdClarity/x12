@@ -35,7 +35,9 @@ api = [
 ]
 dev = [
     "ruff>=0.6",
-    "mypy>=1.8",
+    # ty is a pre-1.0 preview; pin exactly so the blocking type-check gate is
+    # reproducible and upgrades are deliberate.
+    "ty==0.0.53",
     "pre-commit>=2.14.1",
     "pytest>=7.1.0",
     "pytest-cov>=4.0.0",
@@ -54,6 +56,10 @@ version = { attr = "linuxforhealth.x12.__version__" }
 [tool.setuptools.packages.find]
 where = ["src"]
 namespaces = true
+
+[tool.setuptools.package-data]
+# PEP 561 marker so downstream consumers pick up the inline type hints.
+"linuxforhealth.x12" = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["src/tests"]
@@ -76,12 +82,8 @@ target-version = "py310"
 # warnings (F403/F405) are silenced rather than rewritten.
 ignore = ["F403", "F405"]
 
-[tool.mypy]
-python_version = "3.10"
-ignore_missing_imports = true
-# The codebase is not yet fully typed; mypy is provided as an advisory tool.
-# These relaxations keep it runnable without a large up-front typing effort.
-check_untyped_defs = false
-disallow_untyped_defs = false
-warn_unused_ignores = false
-plugins = ["pydantic.mypy"]
+[tool.ty.environment]
+# Target the supported floor; type-checking is independent of the runtime matrix.
+python-version = "3.10"
+# `src` layout: tell ty where first-party modules live.
+root = ["src"]

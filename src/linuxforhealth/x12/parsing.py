@@ -11,7 +11,7 @@ from abc import ABC
 from collections import defaultdict
 from functools import lru_cache, wraps
 from importlib import import_module
-from typing import Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Protocol, Set, cast
 
 from .models import X12SegmentGroup, X12Segment, X12Delimiters, _is_list_field
 from .support import parse_x12_major_version, get_latest_implementation_version
@@ -32,7 +32,23 @@ class X12ParseException(Exception):
     pass
 
 
-def match(segment_name: str, conditions: Dict = None) -> Callable:
+class LoopParser(Protocol):
+    """
+    Structural type for the loop parser callables produced by the ``match`` decorator.
+
+    The decorator attaches a ``segment_group`` attribute used to index parsers by
+    segment name, and the wrapped callable is invoked with the parsed segment data
+    and the active parser context.
+    """
+
+    segment_group: str
+
+    def __call__(
+        self, segment_data: Dict[str, Any], context: "X12ParserContext"
+    ) -> None: ...
+
+
+def match(segment_name: str, conditions: Optional[Dict] = None) -> Callable:
     """
     The match decorator matches a X12 segment to a decorated function.
 
@@ -63,11 +79,8 @@ def match(segment_name: str, conditions: Dict = None) -> Callable:
     conditions = conditions or {}
 
     def decorator(f):
-        # add a segment grouping attribute for the function
-        f.segment_group = segment_name.upper()
-
         @wraps(f)
-        def wrapped(segment_data: Dict, data_context: X12ParserContext):
+        def wrapped(segment_data: Dict, data_context: "X12ParserContext"):
             """
             Executes the wrapped function if segment_data matches the segment_name and optional conditions.
 
@@ -92,7 +105,10 @@ def match(segment_name: str, conditions: Dict = None) -> Callable:
                         if segment_data[k].upper() == v.upper():
                             return f(data_context, segment_data)
 
-        return wrapped
+        # add a segment grouping attribute used to index loop parsers by segment name
+        loop_parser = cast("LoopParser", wrapped)
+        loop_parser.segment_group = segment_name.upper()
+        return loop_parser
 
     return decorator
 
@@ -143,9 +159,9 @@ class X12ParserContext:
         self.transaction_data["header"] = {}
         self.transaction_data["footer"] = {}
         self.is_transaction_complete = False
-        self.subscriber_record = None
-        self.patient_record = None
-        self.hl_segment = None
+        self.subscriber_record = {}
+        self.patient_record = {}
+        self.hl_segment = {}
 
     def mark_transaction_complete(self) -> None:
         """Marks the current transaction as complete"""
@@ -160,12 +176,15 @@ class X12ParserContext:
         """
 
         self.parsed_loops: List[str] = []
-        self.loop_container: Optional[Dict] = {}
-        self.transaction_data: Optional[Dict] = {"header": {}, "footer": {}}
+        self.loop_container: Dict[str, Any] = {}
+        self.transaction_data: Dict[str, Any] = {"header": {}, "footer": {}}
         self.is_transaction_complete: bool = False
-        self.subscriber_record: Optional[Dict] = None
-        self.patient_record: Optional[Dict] = None
-        self.hl_segment: Optional[Dict] = None
+        # The cached records are "cleared" to an empty dict rather than None; the
+        # parser flow always (re)assigns them before reading, so an empty dict is an
+        # equivalent, type-stable sentinel (every read is .get()/subscript/`in`).
+        self.subscriber_record: Dict[str, Any] = {}
+        self.patient_record: Dict[str, Any] = {}
+        self.hl_segment: Dict[str, Any] = {}
 
 
 class X12Parser(ABC):
@@ -174,7 +193,7 @@ class X12Parser(ABC):
     """
 
     # parsing functions used to create loops in the transaction data model
-    loop_parsers = None
+    loop_parsers: Optional[Dict[str, List[LoopParser]]] = None
 
     def _lookup_segment_model(self, segment_name) -> X12Segment:
         """
@@ -186,7 +205,7 @@ class X12Parser(ABC):
         """
 
         try:
-            segment_model: Optional[X12Segment] = self._segment_models[segment_name]
+            segment_model: X12Segment = self._segment_models[segment_name]
         except KeyError:
             msg: str = f"Unsupported segment {segment_name}"
             logger.exception(msg)
@@ -260,7 +279,7 @@ class X12Parser(ABC):
                 msg = f"Error parsing {segment_name} segment field {index}"
                 raise X12ParseException(msg)
 
-            multivalue_separator: str = multivalue_fields.get(field_name)
+            multivalue_separator: Optional[str] = multivalue_fields.get(field_name)
             if multivalue_separator:
                 value = value.split(multivalue_separator)
 
@@ -335,8 +354,8 @@ class X12Parser(ABC):
 
     def __init__(
         self,
-        transaction_model: X12SegmentGroup,
-        loop_parsers: Dict,
+        transaction_model: type[X12SegmentGroup],
+        loop_parsers: Dict[str, List[LoopParser]],
         segment_models: Dict,
         x12_delimiters: Optional[X12Delimiters] = None,
     ) -> None:
@@ -348,18 +367,20 @@ class X12Parser(ABC):
         :param segment_models: Dictionary mapping segment names to domain models
         :param x12_delimiters: The delimiters used to parse segments and fields.
         """
-        self._transaction_model: X12SegmentGroup = transaction_model
-        self._loop_parsers: Dict = loop_parsers
+        self._transaction_model: type[X12SegmentGroup] = transaction_model
+        self._loop_parsers: Dict[str, List[LoopParser]] = loop_parsers
         self._segment_models: Dict = segment_models
         self._delimiters: X12Delimiters = x12_delimiters or X12Delimiters()
         self._context: X12ParserContext = X12ParserContext()
 
 
 @lru_cache
-def _load_loop_parsers(transaction_code: str, implementation_version) -> Dict:
+def _load_loop_parsers(
+    transaction_code: str, implementation_version
+) -> Dict[str, List[LoopParser]]:
     """Returns dictionary of Loop Parsers indexed by segment name"""
     pattern = re.compile(PARSING_FUNCTION_REGEX)
-    loop_parsers = defaultdict(list)
+    loop_parsers: Dict[str, List[LoopParser]] = defaultdict(list)
 
     major_version = parse_x12_major_version(implementation_version)
     latest_implementation_version = get_latest_implementation_version(
@@ -377,7 +398,8 @@ def _load_loop_parsers(transaction_code: str, implementation_version) -> Dict:
     ]
 
     for f in funcs:
-        loop_parsers[f.segment_group].append(f)
+        loop_parser = cast("LoopParser", f)
+        loop_parsers[loop_parser.segment_group].append(loop_parser)
 
     return loop_parsers
 
@@ -385,7 +407,7 @@ def _load_loop_parsers(transaction_code: str, implementation_version) -> Dict:
 @lru_cache
 def _load_transaction_model(
     transaction_code: str, implementation_version: str
-) -> X12SegmentGroup:
+) -> type[X12SegmentGroup]:  # ty: ignore[invalid-return-type]  # dynamic module scan: a matching model is always found
     """Returns the transaction model for the x12 transaction"""
 
     major_version = parse_x12_major_version(implementation_version)
@@ -403,7 +425,8 @@ def _load_transaction_model(
             props: Set = set(class_value.model_fields.keys())
             # transaction set models have header and footer attributes
             if props.issuperset({"header", "footer"}):
-                return class_value
+                # class discovered via dynamic module introspection
+                return cast("type[X12SegmentGroup]", class_value)
 
 
 @lru_cache
@@ -439,9 +462,11 @@ def create_parser(
     :raises: ValueError if the transaction module exists, but a parser class cannot be found.
     """
 
-    transaction_model: X12SegmentGroup = _load_transaction_model(
+    transaction_model: type[X12SegmentGroup] = _load_transaction_model(
         transaction_code, implementation_version
     )
-    loop_parsers: Dict = _load_loop_parsers(transaction_code, implementation_version)
+    loop_parsers: Dict[str, List[LoopParser]] = _load_loop_parsers(
+        transaction_code, implementation_version
+    )
     segment_lookup: Dict = _load_segment_lookup(implementation_version)
     return X12Parser(transaction_model, loop_parsers, segment_lookup, x12_delimiters)
