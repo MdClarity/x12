@@ -2352,7 +2352,9 @@ class Nm1Segment(X12Segment):
         :param field_value: The person name field (first, middle, prefix, suffix) values
         :param info: The validation info containing previously validated field names and values
         """
-        entity_type = info.data["entity_type_qualifier"]
+        # absent when entity_type_qualifier itself failed validation; the
+        # missing/invalid value already surfaces its own error, so skip here
+        entity_type = info.data.get("entity_type_qualifier")
         if cls.EntityQualifierCode.NON_PERSON.value == entity_type:
             if field_value:
                 raise ValueError(

@@ -95,15 +95,17 @@ def match(segment_name: str, conditions: Optional[Dict] = None) -> Callable:
                 return f(data_context, segment_data)
             else:
                 for k, v in conditions.items():
+                    field_value = segment_data.get(k)
+                    # a missing or non-string field value cannot match a condition
+                    if not isinstance(field_value, str):
+                        continue
                     # evaluate "one of" matches
                     if isinstance(v, list):
-                        for i in v:
-                            if segment_data[k].upper() == i.upper():
-                                return f(data_context, segment_data)
-                    else:
-                        # evaluate single matches
-                        if segment_data[k].upper() == v.upper():
+                        if any(field_value.upper() == i.upper() for i in v):
                             return f(data_context, segment_data)
+                    # evaluate single matches
+                    elif field_value.upper() == v.upper():
+                        return f(data_context, segment_data)
 
         # add a segment grouping attribute used to index loop parsers by segment name
         loop_parser = cast("LoopParser", wrapped)
@@ -201,15 +203,15 @@ class X12Parser(ABC):
 
         :param segment_name: The segment name
         :return: The segment model
-        :raises: KeyError if the segment is not found
+        :raises: X12ParseException if the segment is not found
         """
 
         try:
             segment_model: X12Segment = self._segment_models[segment_name]
-        except KeyError:
+        except KeyError as e:
             msg: str = f"Unsupported segment {segment_name}"
             logger.exception(msg)
-            raise
+            raise X12ParseException(msg) from e
         else:
             return segment_model
 
@@ -333,7 +335,18 @@ class X12Parser(ABC):
             self._context.hl_segment = segment_data
 
         for loop_parser in self._loop_parsers[segment_name]:
-            loop_parser(segment_data, self._context)
+            try:
+                loop_parser(segment_data, self._context)
+            except (LookupError, AttributeError) as e:
+                # Loop parsers assume segments arrive in specification order and
+                # navigate the partially-built loop container by key/index/attribute.
+                # Out-of-order or missing parent loops surface as KeyError/IndexError
+                # (LookupError) or attribute access on a None record; convert that
+                # structural class to a clean parse error here, at the single dispatch
+                # chokepoint, rather than in each of the ~90 accessors.
+                raise X12ParseException(
+                    f"Unable to parse segment {segment_name}: unexpected segment order"
+                ) from e
 
         segment_key = f"{segment_name.lower()}_segment"
 

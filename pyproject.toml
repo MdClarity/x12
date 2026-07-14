@@ -33,6 +33,7 @@ dev = [
     # ty is a pre-1.0 preview; pin exactly so the blocking type-check gate is
     # reproducible and upgrades are deliberate.
     "ty==0.0.53",
+    "hypothesis>=6",
     "pre-commit>=2.14.1",
     "pytest>=7.1.0",
     "pytest-cov>=4.0.0",
