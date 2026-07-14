@@ -3,6 +3,7 @@ test_x12_model_reader.py
 
 Supports general model streaming tests validating the number of models returned, expected payload, etc.
 """
+
 from linuxforhealth.x12.io import X12ModelReader
 from linuxforhealth.x12.models import X12Delimiters, X12SegmentGroup
 from typing import Dict, List
@@ -10,7 +11,6 @@ import pytest
 
 
 def test_multiple_transactions(large_x12_message):
-
     with X12ModelReader(large_x12_message) as r:
         model_result = [m for m in r.models()]
         assert len(model_result) == 10
@@ -83,5 +83,5 @@ def test_output_delimiters(simple_270_with_new_lines, output_delimiters):
         model_result: List[X12SegmentGroup] = [m for m in r.models()]
         assert len(model_result) == 1
 
-        model_data = model_result[0].dict()
+        model_data = model_result[0].model_dump()
         _assert_delimiters(model_data, output_delimiters)

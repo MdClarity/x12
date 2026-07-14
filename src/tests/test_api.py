@@ -3,6 +3,7 @@ test_api.py
 
 Tests the optional Fast API x12/endpoint
 """
+
 import pytest
 from linuxforhealth.x12.api import app
 from typing import Dict
@@ -47,9 +48,11 @@ def test_x12_ok_models(mock_x12_payload, api_test_client, header, expected_first
     :param header: The parameterized header value
     :param expected_first_value: The parameterized first value
     """
-    api_response = api_test_client.post(
-        "/x12", json=mock_x12_payload, headers={"LFH-X12-RESPONSE": header}
-    )
+    # A ``None`` header value models the "no response header sent" case, which must
+    # default to the models response. Omit the header entirely rather than sending a
+    # ``None`` value, which HTTP clients reject.
+    headers = {"LFH-X12-RESPONSE": header} if header is not None else {}
+    api_response = api_test_client.post("/x12", json=mock_x12_payload, headers=headers)
     assert api_response.status_code == 200
     assert expected_first_value in api_response.json()[0]
 

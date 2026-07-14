@@ -3,13 +3,57 @@ models.py
 
 Base models for X12 parsing and validation.
 """
+
 import abc
 import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union, get_args, get_origin
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
+
+
+def _unwrap_field_type(annotation):
+    """
+    Resolves the underlying model type for a field annotation, unwrapping
+    ``Optional[...]`` / ``Union[..., None]`` and ``List[...]`` wrappers.
+
+    Pydantic v2 exposes ``FieldInfo.annotation`` (the declared type) rather than
+    v1's pre-unwrapped ``ModelField.type_``, so loop/transaction serialization must
+    reconstruct the inner type to discover serializable sub-models.
+
+    :param annotation: The field's declared annotation.
+    :return: The unwrapped inner type.
+    """
+    origin = get_origin(annotation)
+    if origin is Union:
+        args = [a for a in get_args(annotation) if a is not type(None)]
+        if args:
+            annotation = args[0]
+            origin = get_origin(annotation)
+    if origin in (list, List):
+        args = get_args(annotation)
+        if args:
+            annotation = args[0]
+    return annotation
+
+
+def _is_list_field(annotation) -> bool:
+    """
+    Returns True when a field annotation denotes a list (multi-value) field,
+    unwrapping a leading ``Optional[...]`` / ``Union[..., None]`` wrapper.
+
+    Replaces v1's ``ModelField.outer_type_`` "typing.List" string check.
+
+    :param annotation: The field's declared annotation.
+    """
+    origin = get_origin(annotation)
+    if origin is Union:
+        args = [a for a in get_args(annotation) if a is not type(None)]
+        if args:
+            annotation = args[0]
+            origin = get_origin(annotation)
+    return origin in (list, List)
 
 
 class X12Delimiters(BaseModel):
@@ -21,11 +65,8 @@ class X12Delimiters(BaseModel):
     repetition_separator: str = Field("^", min_length=1, max_length=1)
     segment_terminator: str = Field("~", min_length=1, max_length=1)
     component_separator: str = Field(":", min_length=1, max_length=1)
-
-    class Config:
-        # the model is immutable and hashable
-        allow_mutation = False
-        frozen = True
+    # the model is immutable and hashable
+    model_config = ConfigDict(frozen=True)
 
 
 class X12SegmentName(str, Enum):
@@ -125,14 +166,7 @@ class X12Segment(abc.ABC, BaseModel):
 
     delimiters: Optional[X12Delimiters] = None
     segment_name: X12SegmentName
-
-    class Config:
-        """
-        Default configuration for X12 Models
-        """
-
-        use_enum_values = True
-        extra = "forbid"
+    model_config = ConfigDict(use_enum_values=True, extra="forbid")
 
     def _process_multivalue_field(
         self,
@@ -155,9 +189,8 @@ class X12Segment(abc.ABC, BaseModel):
         """
 
         delimiters = custom_delimiters or X12Delimiters()
-        is_component_field: bool = self.__fields__[field_name].field_info.extra.get(
-            "is_component", False
-        )
+        field_extra = type(self).model_fields[field_name].json_schema_extra or {}
+        is_component_field: bool = bool(field_extra.get("is_component", False))
         if is_component_field:
             join_character = delimiters.component_separator
         else:
@@ -176,7 +209,7 @@ class X12Segment(abc.ABC, BaseModel):
 
         delimiters = custom_delimiters or X12Delimiters()
         x12_values = []
-        for k, v in self.dict(exclude={"delimiters"}).items():
+        for k, v in self.model_dump(exclude={"delimiters"}).items():
             if isinstance(v, str):
                 x12_values.append(v)
             elif isinstance(v, list):
@@ -222,10 +255,14 @@ class X12SegmentGroup(abc.ABC, BaseModel):
         """
         delimiters = custom_delimiters or X12Delimiters()
         x12_segments: List[str] = []
-        fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
+        field_names = [
+            name
+            for name, field in type(self).model_fields.items()
+            if hasattr(_unwrap_field_type(field.annotation), "x12")
+        ]
 
-        for f in fields:
-            field_instance = getattr(self, f.name)
+        for field_name in field_names:
+            field_instance = getattr(self, field_name)
 
             if field_instance is None:
                 continue

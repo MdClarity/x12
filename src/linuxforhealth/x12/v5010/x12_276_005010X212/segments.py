@@ -3,6 +3,7 @@ segments.py
 
 Specialized segment models for the Health Care Claim Status Request 276 005010X212 transaction.
 """
+
 from linuxforhealth.x12.v5010.segments import (
     StSegment,
     BhtSegment,
@@ -37,7 +38,7 @@ class HeaderBhtSegment(BhtSegment):
 
     hierarchical_structure_code: Literal["0010"]
     transaction_set_purpose_code: Literal["13"]
-    transaction_type_code: Optional[str]
+    transaction_type_code: Optional[str] = None
 
 
 class Loop2000AHlSegment(HlSegment):
@@ -46,7 +47,7 @@ class Loop2000AHlSegment(HlSegment):
     """
 
     hierarchical_level_code: Literal["20"]
-    hierarchical_parent_id_number: Optional[str]
+    hierarchical_parent_id_number: Optional[str] = None
     hierarchical_child_code: Literal["1"]
 
 
@@ -65,7 +66,7 @@ class Loop2100ANm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["PR"]
     entity_type_qualifier: Literal["2"]
-    name_first: Optional[str]
+    name_first: Optional[str] = None
     identification_code_qualifier: IdentificationCodeQualifier
 
 
@@ -111,7 +112,7 @@ class Loop2100CNm1Segment(Nm1Segment):
         CMS_NATIONAL_PROVIDER_IDENTIFIER = "XX"
 
     entity_identifier_code: Literal["1P"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
     identification_code_qualifier: IdentificationCodeQualifier
 
 
@@ -129,7 +130,7 @@ class Loop2000DDmgSegment(DmgSegment):
     """
 
     date_time_period_format_qualifier: Literal["D8"]
-    date_time_period: Optional[Union[str, datetime.date]]
+    date_time_period: Optional[Union[str, datetime.datetime, datetime.date]] = None
 
 
 class Loop2100DNm1Segment(Nm1Segment):
@@ -157,8 +158,8 @@ class Loop2200DTrnSegment(TrnSegment):
     """
 
     trace_type_code: Literal["1"]
-    originating_company_identifier: Optional[str]
-    reference_identification_2: Optional[str]
+    originating_company_identifier: Optional[str] = None
+    reference_identification_2: Optional[str] = None
 
 
 class Loop2200DRefSegment(RefSegment):
@@ -203,7 +204,7 @@ class Loop2210DSvcSegment(SvcSegment):
     Subscriber Claim Status Service Line
     """
 
-    line_item_provider_payment_amount: Optional[Decimal]
+    line_item_provider_payment_amount: Optional[Decimal] = None
     original_units_of_service_count: Decimal
 
 
@@ -229,7 +230,7 @@ class Loop2000EHlSegment(HlSegment):
     """
 
     hierarchical_level_code: Literal["23"]
-    hierarchical_child_code: Optional[str]
+    hierarchical_child_code: Optional[str] = None
 
 
 class Loop2100ENm1Segment(Nm1Segment):
@@ -239,5 +240,5 @@ class Loop2100ENm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["QC"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Optional[str]
-    identification_code: Optional[str]
+    identification_code_qualifier: Optional[str] = None
+    identification_code: Optional[str] = None

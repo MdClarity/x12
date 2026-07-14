@@ -22,9 +22,9 @@ from linuxforhealth.x12.v5010.segments import (
     HcpSegment,
     PwkSegment,
 )
-from typing import Literal, Optional, Dict, Union
+from typing import Literal, Optional, Union
 from enum import Enum
-from pydantic import Field, root_validator
+from pydantic import Field, model_validator
 import datetime
 
 
@@ -101,8 +101,8 @@ class Loop1000APerSegment(PerSegment):
         TELEPHONE = "TE"
 
     communication_number_qualifier_1: CommunicationNumberQualifier1
-    communication_number_qualifier_2: Optional[CommunicationNumberQualifier2]
-    communication_number_qualifier_3: Optional[CommunicationNumberQualifier2]
+    communication_number_qualifier_2: Optional[CommunicationNumberQualifier2] = None
+    communication_number_qualifier_3: Optional[CommunicationNumberQualifier2] = None
 
 
 class Loop1000BNm1Segment(Nm1Segment):
@@ -120,7 +120,7 @@ class Loop2000AHlSegment(HlSegment):
     Billing Provider Hierarchical Level
     """
 
-    hierarchical_parent_id_number: Optional[str]
+    hierarchical_parent_id_number: Optional[str] = None
     hierarchical_level_code: Literal["20"]
     hierarchical_child_code: Literal["1"]
 
@@ -213,8 +213,8 @@ class Loop2000BSbrSegment(SbrSegment):
         MUTUALLY_DEFINED = "ZZ"
 
     payer_responsibility_code: PayerResponsibilityCode
-    individual_relationship_code: Optional[Literal["18"]]
-    insurance_type_code: Optional[InsuranceTypeCode]
+    individual_relationship_code: Optional[Literal["18"]] = None
+    insurance_type_code: Optional[InsuranceTypeCode] = None
 
 
 class Loop2000CHlSegment(HlSegment):
@@ -255,7 +255,7 @@ class Loop2010AaNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["85"]
     entity_type_qualifier: Literal["2"]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2010AaRefSegment(RefSegment):
@@ -278,8 +278,8 @@ class Loop2010AaPerSegment(PerSegment):
         TELEPHONE = "TE"
 
     communication_number_qualifier_1: CommunicationNumberQualifier
-    communication_number_qualifier_2: Optional[CommunicationNumberQualifier]
-    communication_number_qualifier_3: Optional[CommunicationNumberQualifier]
+    communication_number_qualifier_2: Optional[CommunicationNumberQualifier] = None
+    communication_number_qualifier_3: Optional[CommunicationNumberQualifier] = None
 
 
 class Loop2010AbNm1Segment(Nm1Segment):
@@ -289,7 +289,7 @@ class Loop2010AbNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["87"]
     entity_type_qualifier: Literal["2"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
 
 
 class Loop2010AcNm1Segment(Nm1Segment):
@@ -341,7 +341,7 @@ class Loop2010BaNm1Segment(Nm1Segment):
         MEMBER_IDENTIFICATION_NUMBER = "MI"
 
     entity_identifier_code: Literal["IL"]
-    identification_code_qualifier: Optional[IdentificationCodeQualifier]
+    identification_code_qualifier: Optional[IdentificationCodeQualifier] = None
 
 
 class Loop2010BaRefSegment(RefSegment):
@@ -454,14 +454,15 @@ class Loop2300DtpSegment(DtpSegment):
     date_time_period_format_qualifier: DateTimePeriodFormatQualifier
     date_time_period: Union[str, datetime.datetime, datetime.date]
 
-    @root_validator
-    def validate_disability_dates(cls, values: Dict):
+    @model_validator(mode="after")
+    def validate_disability_dates(self):
         """
         Validates that a date range qualifier is used for disability dates.
 
         :param values: The model's values
         :return: The model's values
         """
+        values = dict(self.__dict__)
         date_qualifier = values.get("date_time_qualifier")
         period_qualifier = values.get("date_time_period_format_qualifier")
 
@@ -469,7 +470,7 @@ class Loop2300DtpSegment(DtpSegment):
             raise ValueError(
                 "RD8 Date Time Period is required for Disability Dates (314)"
             )
-        return values
+        return self
 
 
 class Loop2300PwkSegment(PwkSegment):
@@ -669,10 +670,10 @@ class Loop2300CrcEpSdtRefferal(CrcSegment):
     code_category: Literal["ZZ"]
     certification_condition_indicator: YesNoResponseCode
     condition_code_1: ConditionsIndicator
-    condition_code_2: Optional[ConditionsIndicator]
-    condition_code_3: Optional[ConditionsIndicator]
-    condition_code_4: Optional[ConditionsIndicator]
-    condition_code_5: Optional[ConditionsIndicator]
+    condition_code_2: Optional[ConditionsIndicator] = None
+    condition_code_3: Optional[ConditionsIndicator] = None
+    condition_code_4: Optional[ConditionsIndicator] = None
+    condition_code_5: Optional[ConditionsIndicator] = None
 
 
 class Loop2300HcpSegment(HcpSegment):
@@ -706,7 +707,7 @@ class Loop2300HcpSegment(HcpSegment):
         UNIT = "UN"
 
     pricing_methodology: PricingMethodologyCodes
-    unit_basis_measurement_code: Optional[MeasurementCodes]
+    unit_basis_measurement_code: Optional[MeasurementCodes] = None
 
 
 class Loop2310ANm1Segment(Nm1Segment):
@@ -716,7 +717,7 @@ class Loop2310ANm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["71"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2310APrvSegment(PrvSegment):
@@ -782,7 +783,7 @@ class Loop2310CNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["ZZ"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2310CRefSegment(RefSegment):
@@ -810,7 +811,7 @@ class Loop2310DNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["82"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2310DRefSegment(Nm1Segment):
@@ -838,8 +839,8 @@ class Loop2310ENm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["77"]
     entity_type_qualifier: Literal["2"]
-    name_last_or_organization_name: Optional[str]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    name_last_or_organization_name: Optional[str] = None
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2310ERefSegment(RefSegment):
@@ -866,7 +867,7 @@ class Loop2310FNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["DN"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2310FRefSegment(RefSegment):
@@ -1058,7 +1059,7 @@ class Loop2330cNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["71"]
     entity_type_qualifier: Literal["1"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
 
 
 class Loop2330cRefSegment(RefSegment):
@@ -1086,7 +1087,7 @@ class Loop2330dNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["72"]
     entity_type_qualifier: Literal["1"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
 
 
 class Loop2330dRefSegment(RefSegment):
@@ -1114,7 +1115,7 @@ class Loop2330eNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["ZZ"]
     entity_type_qualifier: Literal["1"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
 
 
 class Loop2330eRefSegment(RefSegment):
@@ -1142,7 +1143,7 @@ class Loop2330fNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["77"]
     entity_type_qualifier: Literal["2"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
 
 
 class Loop2330fRefSegment(RefSegment):
@@ -1169,7 +1170,7 @@ class Loop2330gNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["82"]
     entity_type_qualifier: Literal["1"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
 
 
 class Loop2330gRefSegment(RefSegment):
@@ -1197,7 +1198,7 @@ class Loop2330HNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["DN"]
     entity_type_qualifier: Literal["1"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
 
 
 class Loop2330HRefSegment(RefSegment):
@@ -1224,7 +1225,7 @@ class Loop2330INm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["85"]
     entity_type_qualifier: Literal["2"]
-    name_last_or_organization_name: Optional[str]
+    name_last_or_organization_name: Optional[str] = None
 
 
 class Loop2330IRefSegment(RefSegment):
@@ -1424,7 +1425,7 @@ class Loop2420BNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["ZZ"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2420BRefSegment(RefSegment):
@@ -1452,7 +1453,7 @@ class Loop2420CNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["82"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2420CRefSegment(RefSegment):
@@ -1480,7 +1481,7 @@ class Loop2420DNm1Segment(Nm1Segment):
 
     entity_identifier_code: Literal["DN"]
     entity_type_qualifier: Literal["1"]
-    identification_code_qualifier: Optional[Literal["XX"]]
+    identification_code_qualifier: Optional[Literal["XX"]] = None
 
 
 class Loop2420DRefSegment(RefSegment):

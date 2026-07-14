@@ -1,11 +1,11 @@
 """
 test_x12_parser_context.py
 """
+
 from linuxforhealth.x12.parsing import X12ParserContext
 
 
 def test_init(x12_parser_context: X12ParserContext):
-
     assert x12_parser_context.loop_name is None
     assert x12_parser_context.loop_container == {}
 
@@ -17,7 +17,6 @@ def test_init(x12_parser_context: X12ParserContext):
 
 
 def test_set_loop_context(x12_parser_context: X12ParserContext):
-
     x12_parser_context.set_loop_context(
         "header", x12_parser_context.transaction_data["header"]
     )

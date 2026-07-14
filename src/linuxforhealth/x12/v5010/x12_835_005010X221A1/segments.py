@@ -3,6 +3,7 @@ segments.py
 
 Specialized segment models for the Health Care Claim Payment 835 005010X221A1 transaction set model.
 """
+
 from linuxforhealth.x12.v5010.segments import (
     StSegment,
     TrnSegment,
@@ -22,7 +23,7 @@ from enum import Enum
 
 class HeaderStSegment(StSegment):
     transaction_set_identifier_code: Literal["835"]
-    implementation_convention_reference: Optional[str]
+    implementation_convention_reference: Optional[str] = None
 
 
 class HeaderTrnSegment(TrnSegment):
@@ -71,7 +72,7 @@ class Loop1000AN1Segment(N1Segment):
     """
 
     entity_identifier_code: Literal["PR"]
-    identification_code_qualifier: Optional[Literal["XV"]]
+    identification_code_qualifier: Optional[Literal["XV"]] = None
 
 
 class Loop1000ARefSegment(RefSegment):

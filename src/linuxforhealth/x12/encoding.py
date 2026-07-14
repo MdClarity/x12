@@ -3,6 +3,7 @@ encoding.py
 
 Custom JSON Encoder used to support data types not included in the JSON Specification.
 """
+
 from typing import Any
 from json import JSONEncoder
 import datetime

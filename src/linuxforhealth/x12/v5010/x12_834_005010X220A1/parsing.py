@@ -8,6 +8,7 @@ as segments are streamed to the transactional data model.
 
 Loop parsing functions are implemented as set_[description]_loop(context: X12ParserContext, segment_data: Dict).
 """
+
 from enum import Enum
 
 from linuxforhealth.x12.parsing import match, X12ParserContext
@@ -369,7 +370,7 @@ def set_provider_information_loop(
         return
 
     coverage = _get_coverage(context)
-    if TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION not in context:
+    if TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION not in coverage:
         coverage[TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION] = []
 
     coverage[TransactionLoops.MEMBER_COVERAGE_PROVIDER_INFORMATION].append(

@@ -3,6 +3,9 @@
 This guide documents the process used to add a new transaction set to LinuxForHealth x12. Please review this guide and
 the implementation within the `x12_270_005010X279A1` transaction set before adding a new transaction.
 
+For looking up X12 segments, data elements, and code-table values, see
+[X12 / EDI References](./X12_REFERENCES.md).
+
 ## Add Transaction Package
 
 Add a new transaction package to the appropriate top level version package such as `x12.v5010`. The new transaction package name must

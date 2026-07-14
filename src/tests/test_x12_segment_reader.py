@@ -1,6 +1,7 @@
 """
 Tests LinuxForHealth X12SegmentReader
 """
+
 import pytest
 
 import linuxforhealth.x12.io
@@ -75,7 +76,6 @@ def test_segments_with_file_path(request, tmpdir, test_input: str):
 
     with X12SegmentReader(f) as r:
         segment_count = 0
-        version_key = None
 
         assert r.delimiters.component_separator == ":"
         assert r.delimiters.element_separator == "*"

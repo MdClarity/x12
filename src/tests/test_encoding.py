@@ -3,6 +3,7 @@ test_encoding.py
 
 Tests the X12 Custom JSON Encoder
 """
+
 from linuxforhealth.x12.encoding import X12JsonEncoder
 from decimal import Decimal
 import uuid

@@ -3,6 +3,7 @@ conftest.py
 
 Pytest Global Fixtures
 """
+
 import pytest
 
 from linuxforhealth.x12.config import X12Config
