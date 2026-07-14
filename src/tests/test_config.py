@@ -3,8 +3,8 @@ test_config.py
 
 Characterization tests for the X12 settings models in ``config.py``.
 
-``X12Config``/``X12ApiConfig`` subclass Pydantic's ``BaseSettings``, which moves to the
-separate ``pydantic-settings`` package in Pydantic v2.  These tests pin the observable
+``X12Config`` subclasses Pydantic's ``BaseSettings``, which moves to the separate
+``pydantic-settings`` package in Pydantic v2.  These tests pin the observable
 behavior -- environment-variable loading, case-insensitivity, defaults, and the
 ``x12_character_set`` pattern constraint -- so the migration preserves it.
 """
@@ -12,7 +12,7 @@ behavior -- environment-variable loading, case-insensitivity, defaults, and the
 import pytest
 from pydantic import ValidationError
 
-from linuxforhealth.x12.config import X12ApiConfig, X12Config
+from linuxforhealth.x12.config import X12Config
 
 
 def test_defaults():
@@ -39,11 +39,3 @@ def test_character_set_pattern_is_enforced(monkeypatch):
     monkeypatch.setenv("X12_CHARACTER_SET", "BOGUS")
     with pytest.raises(ValidationError):
         X12Config()
-
-
-def test_api_config_defaults():
-    api_config = X12ApiConfig()
-    assert api_config.x12_uvicorn_app == "linuxforhealth.x12.api:app"
-    assert api_config.x12_uvicorn_host == "0.0.0.0"
-    assert api_config.x12_uvicorn_port == 5000
-    assert api_config.x12_uvicorn_reload is False
